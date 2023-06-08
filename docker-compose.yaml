@@ -5,25 +5,37 @@ services:
     image: teemukoivumaa/financial-viewer-front:1.0.1
     restart: always
     build: ./frontend
+    volumes:
+      - ./frontend/:/usr/src/app
+      - /usr/src/app/node_modules
     environment:
       port: 8080
       backendport: 8081
+      DEBUG: true
     ports:
       - 3000:8080
   backend:
     image: teemukoivumaa/financial-viewer-back:1.0.1
     restart: always
     build: ./backend
+    volumes:
+      - ./backend/:/usr/src/app
+      - /usr/src/app/node_modules
     environment:
       port: 8081
+      DEBUG: true
+      POSTGRES_DB: financial-viewer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - 3001:8081
-  db:
+  database:
     image: postgres:15.2-alpine
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_DB: financial-viewer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
     volumes:

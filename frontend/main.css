@@ -1,0 +1,89 @@
+html {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+table {
+  border: 2px solid #293241;
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin: 8px 0;
+  border-collapse: collapse;
+}
+
+thead {
+  background-color: #353535;
+  color: white;
+}
+
+tr.header-row:hover {
+  background-color: #353535;
+  color: white;
+}
+
+tr {
+  border-bottom: 2px solid #293241;
+  text-align: center;
+}
+
+tr:hover,
+tr:nth-child(even):hover {
+  background-color: #98c1d9;
+}
+
+tr:nth-child(even) {
+  background-color: #d9d9d9;
+}
+
+td {
+  min-width: 6rem;
+}
+
+td.delete-button {
+  border-left: 2px solid #293241;
+}
+
+td.delete-button:hover {
+  background-color: #e63946;
+  color: white;
+  cursor: pointer;
+}
+
+table.financial-form {
+  border: none;
+}
+
+tr.financial-form {
+  border: none;
+  background-color: white;
+  color: black;
+}
+
+input[type="text"] {
+  border: 2px solid #293241;
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin: 8px;
+  background-color: #f1f1f1;
+  color: black;
+}
+
+input[type="number"] {
+  border: 2px solid #293241;
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin: 8px;
+  background-color: #f1f1f1;
+  color: black;
+}
+
+select {
+  border: 2px solid #293241;
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin: 8px;
+  width: 7rem;
+  background-color: #f1f1f1;
+  color: black;
+}
