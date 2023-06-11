@@ -12,5 +12,5 @@ CREATE TABLE financials (
 );
 
 INSERT INTO financials (investement_type, investement_name, investement_amount, investement_course, sum, currency, stock_ticker) VALUES 
-('Rahasto', 'Rahasto 1', '1.456 kpl', '137.362', '200', '€', null),
-('Osake', 'Osake 1', '5 kpl', '30', '150', '€', 'TKR');
+('Rahasto', 'Rahasto 1', '1.456', '137.362', '200', '€', null),
+('Osake', 'Osake 1', '5', '30', '150', '€', 'TKR');

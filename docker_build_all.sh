@@ -7,7 +7,7 @@ echo "Frontend version: $VERSION"
 docker build . -t teemukoivumaa/financial-viewer-front:$VERSION 
 docker push teemukoivumaa/financial-viewer-front:$VERSION
 
-cd ../backend
+cd /home/teemukoivumaa/financial-viewer/backend
 VERSION=$(npx -c 'echo "$npm_package_version"')
 echo "Backend version: $VERSION"
 

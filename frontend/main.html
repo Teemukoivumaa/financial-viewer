@@ -15,17 +15,24 @@
   </head>
   <body>
     <h1>Financials</h1>
-    <br />
 
     <div id="financials-list"></div>
-    <br /><br />
+    <br />
 
-    <!-- Create a input where user can input these values: investement_type, investement_name, investement_amount, investement_course, sum -->
     <h2>Add Financial</h2>
+    <div class="search" id="search_box">
+      <input
+        type="text"
+        placeholder="Search"
+        id="search"
+        oninput="getSearchNames()"
+      />
+      <div class="resultBox" id="result_box"></div>
+    </div>
     <div id="financial-form"></div>
-    <br /><br />
 
     <button onclick="resetForm()">Reset</button>
+
     <br /><br />
 
     <button onclick="addFinancial()">Submit</button>

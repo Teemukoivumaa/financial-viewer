@@ -70,6 +70,12 @@ app.delete("/delete-financial", async function (req, res) {
   }
 });
 
+const routes = require("./router.js");
+app.use("/stock/", routes.getStockData);
+app.use("/fund/", routes.getFundData);
+app.use("/search/", routes.search);
+app.use("/convert/", routes.convertCurrency);
+
 app.listen(port, async function () {
   console.log("Server started in port: " + port);
   await checkBackend();
