@@ -1,6 +1,6 @@
 {
   "name": "financial-viewer-frontend",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Frontend for the financial viewer app",
   "main": "server.js",
   "scripts": {

@@ -12,7 +12,8 @@ table {
   border-collapse: collapse;
 }
 
-thead {
+thead,
+tfoot {
   background-color: #353535;
   color: white;
 }
@@ -37,7 +38,19 @@ tr:nth-child(even) {
 }
 
 td {
-  min-width: 6rem;
+  min-width: 7rem;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+td.positive-change {
+  color: green;
+}
+
+td.negative-change {
+  color: red;
 }
 
 td.delete-button {
@@ -86,4 +99,68 @@ select {
   width: 7rem;
   background-color: #f1f1f1;
   color: black;
+}
+
+.search .resultBox {
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  max-height: 280px;
+  width: 25rem;
+  overflow-y: auto;
+}
+
+.search.active .resultBox {
+  padding: 10px 8px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.resultBox {
+  border: 2px solid #293241;
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin: 8px;
+  color: black;
+}
+
+.resultBox li {
+  list-style: none;
+  padding: 8px 12px;
+  min-width: 7rem;
+  cursor: default;
+  border-radius: 3px;
+}
+
+.resultBox li:hover {
+  background: #efefef;
+}
+
+/* Loader */
+
+.lds-dual-ring {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  left: 50%;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid #cef;
+  border-color: #cef transparent #cef transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

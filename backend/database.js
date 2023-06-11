@@ -120,7 +120,7 @@ async function addFinancial(req, res) {
     "', '" +
     req.body.financial.investement_sum +
     "', '" +
-    "€" +
+    req.body.financial.investement_currency +
     "', '" +
     req.body.financial.investement_ticker +
     "');";
