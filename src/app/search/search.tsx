@@ -51,9 +51,10 @@ async function returnStock(
   index: number,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const response = await fetch(
-    `http://localhost:3000/api/stock/${stock.symbol}`
-  );
+  const backend =
+    process.env.BACKEND ?? "https://teemukoivumaa.github.io/financial-viewer";
+
+  const response = await fetch(`${backend}/api/stock/${stock.symbol}`);
 
   const stockInformation: StockInformation = await response.json();
 
@@ -89,9 +90,10 @@ async function searchFinancial(
   if (searchQuery.length <= 0)
     return <p className="text-md">Type something to search</p>;
 
-  const response = await fetch(
-    `http://localhost:3000/api/search/${searchQuery}`
-  );
+  const backend =
+    process.env.BACKEND ?? "https://teemukoivumaa.github.io/financial-viewer";
+
+  const response = await fetch(`${backend}/api/search/${searchQuery}`);
 
   const stocks = await response.json();
 
