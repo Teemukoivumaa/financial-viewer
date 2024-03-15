@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic"; // static by default, unless reading the request
 import { NextResponse } from "next/server";
 
 interface ParsedStock {
@@ -12,10 +13,6 @@ function parseStocks(response: any[]): ParsedStock[] {
       symbol: stock.symbol,
       shortname: stock.shortname,
     }));
-}
-
-export async function generateStaticParams() {
-  return [{ word: "apple" }];
 }
 
 export async function GET(

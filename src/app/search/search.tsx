@@ -51,8 +51,7 @@ async function returnStock(
   index: number,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const backend =
-    process.env.BACKEND ?? "https://teemukoivumaa.github.io/financial-viewer";
+  const backend = process.env.BACKEND ?? "https://financial-viewer.vercel.app";
 
   const response = await fetch(`${backend}/api/stock/${stock.symbol}`);
 
@@ -90,8 +89,7 @@ async function searchFinancial(
   if (searchQuery.length <= 0)
     return <p className="text-md">Type something to search</p>;
 
-  const backend =
-    process.env.BACKEND ?? "https://teemukoivumaa.github.io/financial-viewer";
+  const backend = process.env.BACKEND ?? "https://financial-viewer.vercel.app";
 
   const response = await fetch(`${backend}/api/search/${searchQuery}`);
 
