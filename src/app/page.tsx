@@ -7,7 +7,7 @@ export default function Home() {
     <>
       <TopBar />
 
-      <div className="max-w-screen-md mx-auto p-4">
+      <div className="max-w-screen-xl mx-auto p-4">
         <SetupDataTable />
         <br />
         <AddFinancial />

@@ -4,3 +4,8 @@ export interface ParsedFinancial {
   exchDisp: string;
   typeDisp: string;
 }
+
+export interface StockInformation {
+  regularMarketPrice: string;
+  currency: string;
+}

@@ -5,12 +5,7 @@ import { Suspense } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { ParsedFinancial } from "../utils/types";
-
-interface StockInformation {
-  regularMarketPrice: string;
-  currency: string;
-}
+import { ParsedFinancial, StockInformation } from "../utils/types";
 
 function addFinancial(
   financial: ParsedFinancial,
