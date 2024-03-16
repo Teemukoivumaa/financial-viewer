@@ -5,11 +5,7 @@ import { Suspense } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Cross1Icon } from "@radix-ui/react-icons";
-
-interface Stock {
-  symbol: string;
-  shortname: string;
-}
+import { ParsedFinancial } from "../utils/types";
 
 interface StockInformation {
   regularMarketPrice: string;
@@ -17,25 +13,27 @@ interface StockInformation {
 }
 
 function addFinancial(
-  stock: Stock,
-  stockInformation: StockInformation,
+  financial: ParsedFinancial,
+  financialInformation: StockInformation,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  if (typeof window === "undefined" || stock === undefined) return;
+  if (typeof window === "undefined" || financial === undefined) return;
 
   const financialObject = JSON.parse(
     localStorage.getItem("financials") || "[]"
   );
 
+  const type = financial.typeDisp !== "Equity" ? financial.typeDisp : "Stock";
+
   financialObject?.push({
-    title: `${stock.shortname}`,
-    ticker: `${stock.symbol}`,
+    title: financial.shortname,
+    ticker: financial.symbol,
     date: new Date().toLocaleDateString(),
-    type: "Stock",
+    type: type,
     amount: 0,
-    owned: 0,
-    course: stockInformation.regularMarketPrice,
-    currency: stockInformation.currency,
+    owned: 1,
+    course: financialInformation.regularMarketPrice,
+    currency: financialInformation.currency,
   });
 
   localStorage.setItem("financials", JSON.stringify(financialObject));
@@ -47,36 +45,41 @@ function addFinancial(
   }, 500);
 }
 
-async function returnStock(
-  stock: Stock,
+async function returnFinancial(
+  financial: ParsedFinancial,
   index: number,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const backend =
-    process.env.NEXT_PUBLIC_BACKEND ?? "https://financial-viewer.vercel.app";
+  const response = await fetch(`/api/financial/${financial.symbol}`);
 
-  const response = await fetch(`${backend}/api/stock/${stock.symbol}`);
-
-  const stockInformation: StockInformation = await response.json();
+  const financeInformation: StockInformation = await response.json();
 
   return (
     <li key={index}>
       <div
-        onClick={() => addFinancial(stock, stockInformation, setOpen)}
-        className="cursor-pointer dark:hover:bg-gray-900 hover:bg-gray-200 transition-colors duration-300 ease-in-out rounded p-2 flex justify-between items-center"
+        onClick={() => addFinancial(financial, financeInformation, setOpen)}
+        className="cursor-pointer dark:hover:bg-gray-900 hover:bg-gray-200 transition-colors duration-300 ease-in-out rounded p-2 flex flex-row"
       >
-        <div>
-          <h4 className="text-xs sm:text-sm font-medium leading-none ">
-            {stock.shortname}
+        <div className="basis-1/2">
+          <h4 className="text-xs sm:text-sm font-medium leading-none">
+            {financial.shortname}
           </h4>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            {stock.symbol}
+            {financial.symbol}
+          </p>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {financial.exchDisp}
           </p>
         </div>
-        <div className="flex flex-col items-end">
+        <div className="basis-1/4 p-2">
+          <h4 className="text-xs sm:text-sm font-medium leading-none">
+            {financial.typeDisp}
+          </h4>
+        </div>
+        <div className="basis-1/4">
           <h3 className="text-xs sm:text-sm font-medium">Latest value:</h3>
           <h3 className="text-xs sm:text-sm font-medium">
-            {`${stockInformation.regularMarketPrice} ${stockInformation.currency}`}
+            {`${financeInformation.regularMarketPrice} ${financeInformation.currency}`}
           </h3>
         </div>
       </div>
@@ -93,22 +96,19 @@ async function searchFinancial(
   if (searchQuery.length <= 0)
     return <p className="text-md">Type something to search</p>;
 
-  const backend =
-    process.env.NEXT_PUBLIC_BACKEND ?? "https://financial-viewer.vercel.app";
+  const response = await fetch(`/api/search/${searchQuery}`);
 
-  const response = await fetch(`${backend}/api/search/${searchQuery}`);
+  const financial = await response.json();
 
-  const stocks = await response.json();
-
-  if (stocks.length <= 0)
+  if (financial.length <= 0)
     return <p className="text-md">Could not find any results</p>;
 
   return (
     <>
       <ul className="mt-4">
-        {stocks.map(
-          async (stock: Stock, index: number) =>
-            await returnStock(stock, index, setOpen)
+        {financial.map(
+          async (financial: ParsedFinancial, index: number) =>
+            await returnFinancial(financial, index, setOpen)
         )}
       </ul>
     </>
@@ -116,11 +116,10 @@ async function searchFinancial(
 }
 
 interface SearchProps {
-  label?: string;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function Search({ label, setOpen }: SearchProps) {
+export function Search({ setOpen }: SearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(null as any);
@@ -167,9 +166,9 @@ export function Search({ label, setOpen }: SearchProps) {
         </Button>
       </div>
       {searching ? (
-        <p className="text-md">Searching...</p>
+        <p className="text-s sm:text-md">Searching...</p>
       ) : (
-        <Suspense fallback={<p className="text-md">Searching...</p>}>
+        <Suspense fallback={<p className="text-s sm:text-md">Searching...</p>}>
           {searchResult}
         </Suspense>
       )}

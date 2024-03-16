@@ -22,7 +22,7 @@ export function AddFinancial() {
       <DialogTrigger asChild>
         <Button variant="outline">Add new financial</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-screen-sm">
+      <DialogContent className="max-w-sm sm:max-w-screen-sm">
         <DialogHeader>
           <DialogTitle>Add financial</DialogTitle>
           <DialogDescription>

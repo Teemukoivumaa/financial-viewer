@@ -134,7 +134,7 @@ export const columns: ColumnDef<Transaction>[] = [
           </DropdownMenu>
 
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="max-w-screen-sm">
+            <DialogContent className="max-w-sm sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>Modify {financial.title}</DialogTitle>
                 <DialogDescription>

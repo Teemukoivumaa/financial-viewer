@@ -3,8 +3,10 @@
 import * as React from "react";
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
@@ -39,6 +41,9 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({ currency: false });
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
 
   const [refresh, setRefresh] = React.useState(false);
   const [tableData, setTableData] = React.useState(data as TData[]);
@@ -58,17 +63,68 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnFiltersChange: setColumnFilters,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       columnVisibility,
+      columnFilters,
     },
   });
 
+  const uniqueValues = React.useMemo(() => {
+    let values = table
+      .getCoreRowModel()
+      .flatRows.map((row) => row.getValue("type")) as string[];
+    values.unshift("All");
+    return Array.from(new Set(values));
+  }, [table]);
+
+  const filterValue = columnFilters?.[0]?.value;
+
   return (
     <>
-      <div className="flex items-center py-4">
-        <Button onClick={handleRefresh} variant="outline" className="mb-2">
-          <ReloadIcon className="mr-2 h-4 w-4" /> Refresh table
-        </Button>
+      <div className="flex flex-row justify-between py-4">
+        <div className="flex">
+          {/* Reload */}
+          <Button
+            onClick={handleRefresh}
+            variant="outline"
+            className="mb-2 mr-4"
+          >
+            <ReloadIcon className="mr-2 h-4 w-4" /> Refresh
+          </Button>
+
+          {/* Type */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="mr-4" asChild>
+              <Button variant="outline" className="ml-auto ">
+                Type
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="mr-4">
+              {uniqueValues.map((type) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={type}
+                    className="capitalize"
+                    checked={
+                      filterValue ? filterValue === type : "All" === type
+                    }
+                    onCheckedChange={() => {
+                      type === "All"
+                        ? table.resetColumnFilters()
+                        : table.getColumn("type")?.setFilterValue(type);
+                    }}
+                  >
+                    {type}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Columns */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
