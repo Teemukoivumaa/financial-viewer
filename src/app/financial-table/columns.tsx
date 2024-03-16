@@ -23,6 +23,8 @@ import {
 import { ModifyFinancial } from "../modifyFinancial/modifyFields";
 import useFinancialState from "../modifyFinancial/useFinancialState";
 import { deleteFinancial, saveFinancial } from "../utils/saveFinancial";
+import { getTickerData } from "../utils/getTableInfo";
+import { Suspense } from "react";
 
 export type Transaction = {
   title: string;
@@ -66,12 +68,10 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    header: () => <div className="text-right">Initial investment</div>,
     cell: ({ row }) => {
-      const owned = Number(row.getValue("owned"));
-      const course = Number(row.getValue("course"));
+      const amount = Number(row.getValue("amount"));
 
-      const amount = owned * course;
       const currency = row.getValue("currency") ?? "EUR";
       const formatted = new Intl.NumberFormat("fi-FI", {
         style: "currency",
@@ -79,6 +79,24 @@ export const columns: ColumnDef<Transaction>[] = [
       }).format(amount);
 
       return <div className="text-right font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "amount now",
+    header: () => <div className="text-right">Amount now</div>,
+    cell: ({ row }) => {
+      const ticker = row.getValue("ticker") as string;
+      const owned = Number(row.getValue("owned"));
+      const amount = Number(row.getValue("amount"));
+      const currency = (row.getValue("currency") as string) ?? "EUR";
+
+      return (
+        <Suspense
+          fallback={<p className="text-right font-medium">Fetching...</p>}
+        >
+          {getTickerData(ticker, amount, owned, currency)}
+        </Suspense>
+      );
     },
   },
   {
