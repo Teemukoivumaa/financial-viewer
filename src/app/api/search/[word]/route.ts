@@ -1,17 +1,18 @@
 export const dynamic = "force-dynamic"; // static by default, unless reading the request
 import { NextResponse } from "next/server";
+import { ParsedFinancial } from "../../../utils/types";
 
-interface ParsedStock {
-  symbol: string;
-  shortname: string;
-}
-
-function parseStocks(response: any[]): ParsedStock[] {
+function parseResponse(response: any[]): ParsedFinancial[] {
   return response
-    .filter((stock) => stock.quoteType === "EQUITY") // Filter out objects where quoteType is not EQUITY
-    .map((stock) => ({
-      symbol: stock.symbol,
-      shortname: stock.shortname,
+    .filter(
+      (finance) =>
+        finance.quoteType === "EQUITY" || finance.quoteType === "MUTUALFUND"
+    ) // Filter out objects where quoteType is not EQUITY
+    .map((finance) => ({
+      symbol: finance.symbol,
+      shortname: finance.shortname,
+      exchDisp: finance.exchDisp,
+      typeDisp: finance.typeDisp,
     }));
 }
 
@@ -29,5 +30,5 @@ export async function GET(
   );
   const data = await response.json();
 
-  return NextResponse.json(parseStocks(data?.quotes));
+  return NextResponse.json(parseResponse(data?.quotes));
 }
