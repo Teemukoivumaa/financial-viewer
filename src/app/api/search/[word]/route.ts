@@ -15,6 +15,8 @@ function parseStocks(response: any[]): ParsedStock[] {
     }));
 }
 
+export const revalidate = 3600;
+
 export async function GET(
   request: Request,
   { params }: { params: { word: string } }

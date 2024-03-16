@@ -1,5 +1,5 @@
 import { TopBar } from "./top-bar";
-import { AddFinancial } from "./addFinancial/dialog";
+import { AddFinancial } from "./addFinancial/addDialog";
 import SetupDataTable from "./financial-table/setup-table";
 
 export default function Home() {

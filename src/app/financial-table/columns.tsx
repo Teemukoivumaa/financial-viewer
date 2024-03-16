@@ -61,6 +61,10 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Median course",
   },
   {
+    accessorKey: "currency",
+    header: "Currency",
+  },
+  {
     accessorKey: "amount",
     header: () => <div className="text-right">Amount</div>,
     cell: ({ row }) => {

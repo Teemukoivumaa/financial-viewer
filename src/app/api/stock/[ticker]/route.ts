@@ -11,6 +11,8 @@ export async function generateStaticParams() {
   return [{ ticker: "APPL" }];
 }
 
+export const revalidate = 3600;
+
 export async function GET(
   request: Request,
   { params }: { params: { ticker: string } }
