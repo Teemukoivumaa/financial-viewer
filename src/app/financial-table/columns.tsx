@@ -22,22 +22,12 @@ import {
 } from "@/components/ui/dialog";
 import { ModifyFinancial } from "../modifyFinancial/modifyFields";
 import useFinancialState from "../modifyFinancial/useFinancialState";
-import { deleteFinancial, saveFinancial } from "../utils/saveFinancial";
+import { deleteFinancial, saveFinancial } from "../utils/financialFunctions";
 import { getTickerData } from "../utils/getTableInfo";
 import { Suspense } from "react";
+import { Financial } from "../utils/types";
 
-export type Transaction = {
-  title: string;
-  ticker: string;
-  type: string;
-  date: string;
-  amount: number;
-  owned: number;
-  course: string;
-  currency: string;
-};
-
-export const columns: ColumnDef<Transaction>[] = [
+export const columns: ColumnDef<Financial>[] = [
   {
     accessorKey: "title",
     header: "Title",
@@ -177,7 +167,7 @@ export const columns: ColumnDef<Transaction>[] = [
                           owned: owned,
                           course: `${course}`,
                           currency: `${financial.currency}`,
-                        } as Transaction,
+                        } as Financial,
                         financial
                       );
                       setTimeout(() => {

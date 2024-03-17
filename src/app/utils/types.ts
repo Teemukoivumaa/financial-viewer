@@ -1,3 +1,14 @@
+export type Financial = {
+  title: string;
+  ticker: string;
+  type: string;
+  date: string;
+  amount: number;
+  owned: number;
+  course: string;
+  currency: string;
+};
+
 export interface ParsedFinancial {
   symbol: string;
   shortname: string;

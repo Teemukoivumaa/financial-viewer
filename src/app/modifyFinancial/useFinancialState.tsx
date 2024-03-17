@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Transaction } from "../financial-table/columns";
+import { Financial } from "../financial-table/columns";
 
-function useFinancialState(initialFinancial: Transaction) {
+function useFinancialState(initialFinancial: Financial) {
   const [owned, setOwned] = useState(Number(initialFinancial.owned) ?? 0);
   const [course, setCourse] = useState(Number(initialFinancial.course) ?? 0);
   const [value, setValue] = useState(Number(initialFinancial.amount) ?? 0);
