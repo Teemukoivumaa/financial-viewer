@@ -1,4 +1,4 @@
-import { Financial } from "../financial-table/columns";
+import { Financial } from "./types";
 import { toast } from "sonner";
 
 export function saveFinancial(

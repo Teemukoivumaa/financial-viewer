@@ -35,7 +35,9 @@ function generateRandomSixDigitNumber() {
 export function ShareFinancial() {
   const [open, setOpen] = useState(false);
   const [userFunction, setUserFunction] = useState("share");
-  const [shareId, setShareId] = useState(generateRandomSixDigitNumber());
+  const [shareId, setShareId] = useState(
+    String(generateRandomSixDigitNumber())
+  );
   const [shared, setShared] = useState(false);
 
   const handleShare = async () => {
@@ -83,7 +85,7 @@ export function ShareFinancial() {
         <Select
           onValueChange={(value) => {
             setUserFunction(value);
-            setShareId(generateRandomSixDigitNumber());
+            setShareId(String(generateRandomSixDigitNumber()));
           }}
         >
           <SelectTrigger className="w-[180px]">
