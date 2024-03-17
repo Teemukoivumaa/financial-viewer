@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Financial } from "../financial-table/columns";
+import { Financial } from "../utils/types";
 
 function useFinancialState(initialFinancial: Financial) {
   const [owned, setOwned] = useState(Number(initialFinancial.owned) ?? 0);
