@@ -45,7 +45,9 @@ async function returnFinancial(
   index: number,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const response = await fetch(`/api/financial/${financial.symbol}`);
+  const response = await fetch(`/api/financial/${financial.symbol}`, {
+    next: { revalidate: 3600 },
+  });
 
   const financeInformation: StockInformation = await response.json();
 
@@ -91,7 +93,9 @@ async function searchFinancial(
   if (searchQuery.length <= 0)
     return <p className="text-md">Type something to search</p>;
 
-  const response = await fetch(`/api/search/${searchQuery}`);
+  const response = await fetch(`/api/search/${searchQuery}`, {
+    next: { revalidate: 3600 },
+  });
 
   const financial = await response.json();
 

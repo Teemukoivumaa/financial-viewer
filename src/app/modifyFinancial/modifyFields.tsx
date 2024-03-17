@@ -2,11 +2,11 @@
 
 import React, { useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Transaction } from "../financial-table/columns";
+import { Financial } from "../utils/types";
 import { Label } from "@/components/ui/label";
 
 interface ModifyProps {
-  financial: Transaction;
+  financial: Financial;
   states: any;
 }
 

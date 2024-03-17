@@ -1,5 +1,5 @@
 import { StockInformation } from "./types";
-import { ChevronUpIcon, ChevronDownIcon } from "@radix-ui/react-icons";
+import React, { useState, useEffect, useMemo } from "react";
 
 export async function getTickerData(
   ticker: string,
@@ -7,8 +7,24 @@ export async function getTickerData(
   owned: Number,
   currency: string
 ) {
-  const response = await fetch(`/api/financial/${ticker}`);
-  const financeInformation: StockInformation = await response.json();
+  const [financeInformation, setFinanceInformation] =
+    useState<StockInformation | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`/api/financial/${ticker}`, {
+        next: { revalidate: 3600 },
+      });
+      const data = await response.json();
+      setFinanceInformation(data);
+    };
+
+    fetchData();
+  }, [ticker]);
+
+  if (!financeInformation) {
+    return <p className="text-right font-medium">Fetching...</p>; // or any other loading indicator
+  }
 
   const currentPrice = Number(financeInformation.regularMarketPrice);
   const currentValue = currentPrice * Number(owned);

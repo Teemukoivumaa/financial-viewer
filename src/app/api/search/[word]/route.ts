@@ -26,6 +26,7 @@ export async function GET(
     `https://query1.finance.yahoo.com/v1/finance/search?q=${params.word}`,
     {
       method: "GET",
+      next: { revalidate: 3600 },
     }
   );
   const data = await response.json();

@@ -1,5 +1,3 @@
-import { StockInformation } from "./types";
-
 export function getData() {
   if (typeof window === "undefined") return [];
 
