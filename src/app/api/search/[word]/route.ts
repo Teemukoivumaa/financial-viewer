@@ -29,7 +29,7 @@ export async function GET(
       next: { revalidate: 3600 },
     }
   );
-  const data = await response.json();
+  const data = await response?.json();
 
   return NextResponse.json(parseResponse(data?.quotes));
 }

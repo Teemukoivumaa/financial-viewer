@@ -23,7 +23,7 @@ import {
 import { ModifyFinancial } from "../modifyFinancial/modifyFields";
 import useFinancialState from "../modifyFinancial/useFinancialState";
 import { deleteFinancial, saveFinancial } from "../utils/financialFunctions";
-import { getTickerData } from "../utils/getTableInfo";
+import { getTickerData, getCourseNow } from "../utils/getTableInfo";
 import { Suspense } from "react";
 import { Financial } from "../utils/types";
 
@@ -46,11 +46,11 @@ export const columns: ColumnDef<Financial>[] = [
   },
   {
     accessorKey: "owned",
-    header: "Owned",
+    header: "Amount Owned",
   },
   {
     accessorKey: "course",
-    header: "Median course",
+    header: "Median buy course",
   },
   {
     accessorKey: "currency",
@@ -72,8 +72,24 @@ export const columns: ColumnDef<Financial>[] = [
     },
   },
   {
+    accessorKey: "course now",
+    header: () => <div className="text-right">Course now</div>,
+    cell: ({ row }) => {
+      const ticker = row.getValue("ticker") as string;
+      const currency = (row.getValue("currency") as string) ?? "EUR";
+
+      return (
+        <Suspense
+          fallback={<p className="text-right font-medium">Fetching...</p>}
+        >
+          {getCourseNow(ticker, currency)}
+        </Suspense>
+      );
+    },
+  },
+  {
     accessorKey: "amount now",
-    header: () => <div className="text-right">Amount now</div>,
+    header: () => <div className="text-right">Price now</div>,
     cell: ({ row }) => {
       const ticker = row.getValue("ticker") as string;
       const owned = Number(row.getValue("owned"));

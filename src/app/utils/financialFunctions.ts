@@ -50,5 +50,5 @@ export function importFinancials(newFinancials: Financial[]) {
   // Update localStorage with the combined financial object
   localStorage.setItem("financials", JSON.stringify(newFinancialObject));
 
-  toast("Financials replaced successfully!");
+  toast("Financials imported successfully!");
 }

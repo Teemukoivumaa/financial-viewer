@@ -97,7 +97,7 @@ async function searchFinancial(
     next: { revalidate: 3600 },
   });
 
-  const financial = await response.json();
+  const financial = response.status === 200 ? await response.json() : [];
 
   if (financial.length <= 0)
     return <p className="text-md">Could not find any results</p>;
