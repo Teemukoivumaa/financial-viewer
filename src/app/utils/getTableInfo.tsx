@@ -51,3 +51,37 @@ export async function getTickerData(
     </>
   );
 }
+
+export async function getCourseNow(ticker: string, currency: string) {
+  const [financeInformation, setFinanceInformation] =
+    useState<StockInformation | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch(`/api/financial/${ticker}`, {
+        next: { revalidate: 3600 },
+      });
+      const data = await response.json();
+      setFinanceInformation(data);
+    };
+
+    fetchData();
+  }, [ticker]);
+
+  if (!financeInformation) {
+    return <p className="text-right font-medium">Fetching...</p>; // or any other loading indicator
+  }
+
+  const currentPrice = Number(financeInformation.regularMarketPrice);
+
+  const formatted = new Intl.NumberFormat("fi-FI", {
+    style: "currency",
+    currency: `${currency}`,
+  }).format(currentPrice);
+
+  return (
+    <>
+      <div className="text-right font-medium">{formatted}</div>
+    </>
+  );
+}

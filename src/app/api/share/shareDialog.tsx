@@ -72,20 +72,18 @@ export function ShareFinancial() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Share or Import financials</Button>
+        <Button variant="outline" className="mr-5">
+          Share or Import financials
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-sm sm:max-w-screen-sm">
         <DialogHeader>
           <DialogTitle>Share or Import financials</DialogTitle>
-          <DialogDescription>
-            Select what you would like to do
-          </DialogDescription>
         </DialogHeader>
 
         <Select
           onValueChange={(value) => {
             setUserFunction(value);
-            setShareId(String(generateRandomSixDigitNumber()));
           }}
         >
           <SelectTrigger className="w-[180px]">
@@ -106,6 +104,9 @@ export function ShareFinancial() {
                 <p className="text-sm text-center">
                   Use this code to import the financials
                 </p>
+                <Button onClick={handleShare} variant="outline">
+                  Update Shared Financials
+                </Button>
               </>
             ) : (
               <>
@@ -119,7 +120,7 @@ export function ShareFinancial() {
         )}
 
         {userFunction === "import" && (
-          <div>
+          <>
             <Label htmlFor="shareIdInput">Enter Share ID:</Label>
             <Input
               type="text"
@@ -131,14 +132,8 @@ export function ShareFinancial() {
             <Button onClick={() => handleImport(shareId)}>
               Import Financials
             </Button>
-          </div>
+          </>
         )}
-
-        <DialogFooter className="sm:justify-start">
-          <DialogClose asChild>
-            <Button type="button">Close</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

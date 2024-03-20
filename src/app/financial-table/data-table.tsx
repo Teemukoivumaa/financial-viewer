@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { getData } from "../utils/getData";
+import { getData, getTableColumn, setTableColumn } from "../utils/getData";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -40,7 +40,7 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({ currency: false });
+    React.useState<VisibilityState>(getTableColumn());
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -142,9 +142,10 @@ export function DataTable<TData, TValue>({
                       key={column.id}
                       className="capitalize"
                       checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
+                      onCheckedChange={(value) => {
+                        column.toggleVisibility(!!value);
+                        setTableColumn(column.id, !!value);
+                      }}
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
