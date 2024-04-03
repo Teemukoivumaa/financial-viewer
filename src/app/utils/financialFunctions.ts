@@ -1,6 +1,24 @@
 import { Financial } from "./types";
 import { toast } from "sonner";
 
+function generateUserId() {
+  const userId = Math.random().toString(36).substring(2);
+  localStorage.setItem("userId", userId);
+
+  return userId;
+}
+
+export function getUserId() {
+  if (typeof window === "undefined") return;
+
+  let userId = localStorage.getItem("userId");
+  if (!userId) {
+    // If user ID does not exist, generate and store a new one
+    userId = generateUserId();
+  }
+  return userId;
+}
+
 export function saveFinancial(
   newFinancial: Financial,
   oldFinancial: Financial

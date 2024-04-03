@@ -20,7 +20,9 @@ export function AddFinancial() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Add new financial</Button>
+        <Button variant="outline" className="mb-2 mr-4">
+          Add new financial
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-sm sm:max-w-screen-sm">
         <DialogHeader>
