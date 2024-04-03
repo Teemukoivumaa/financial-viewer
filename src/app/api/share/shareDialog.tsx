@@ -72,7 +72,7 @@ export function ShareFinancial() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="mr-5">
+        <Button variant="outline" className="mr-5 ml-5">
           Share or Import financials
         </Button>
       </DialogTrigger>

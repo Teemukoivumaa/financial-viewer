@@ -29,6 +29,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { getData, getTableColumn, setTableColumn } from "../utils/getData";
+import { calculateCurrentValue, requestCourse } from "../utils/getTableInfo";
+import useAsync from "react-use/lib/useAsync";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -80,6 +82,41 @@ export function DataTable<TData, TValue>({
   }, [table]);
 
   const filterValue = columnFilters?.[0]?.value;
+
+  const { loading, value } = useAsync(async () => {
+    try {
+      const rows = table.getCoreRowModel().flatRows;
+
+      if (rows?.length <= 0) {
+        return "";
+      }
+
+      const totalValue = await Promise.all(
+        rows.map(async (row) => {
+          const ticker = row.getValue("ticker") as string;
+          const owned = Number(row.getValue("owned"));
+
+          const { regularMarketPrice } = await requestCourse(ticker);
+
+          return calculateCurrentValue(regularMarketPrice, owned);
+        })
+      );
+
+      // Calculate the sum of all current values
+      const sumValue = totalValue.reduce((acc, curr) => acc + curr, 0);
+
+      const formatted = new Intl.NumberFormat("fi-FI", {
+        style: "currency",
+        currency: `EUR`,
+      }).format(sumValue);
+
+      localStorage.setItem("totalValue", formatted);
+
+      return formatted;
+    } catch (error) {
+      throw new Error("Failed to calculate total value");
+    }
+  }, [table]);
 
   return (
     <>
@@ -202,6 +239,18 @@ export function DataTable<TData, TValue>({
                 </TableCell>
               </TableRow>
             )}
+
+            <TableRow>
+              <TableCell colSpan={1} className="font-medium text-left">
+                Total
+              </TableCell>
+              <TableCell
+                colSpan={columns.length - 2}
+                className="font-medium text-right"
+              >
+                {loading ? "Loading..." : `${value}`}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </div>
