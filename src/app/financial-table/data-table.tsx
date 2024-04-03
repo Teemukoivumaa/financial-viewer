@@ -31,6 +31,7 @@ import { ReloadIcon } from "@radix-ui/react-icons";
 import { getData, getTableColumn, setTableColumn } from "../utils/getData";
 import { calculateCurrentValue, requestCourse } from "../utils/getTableInfo";
 import useAsync from "react-use/lib/useAsync";
+import { AddFinancial } from "../addFinancial/addDialog";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -122,6 +123,8 @@ export function DataTable<TData, TValue>({
     <>
       <div className="flex flex-row justify-between py-4">
         <div className="flex">
+          <AddFinancial />
+
           {/* Reload */}
           <Button
             onClick={handleRefresh}
