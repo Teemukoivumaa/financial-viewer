@@ -1,5 +1,16 @@
 import { StockInformation } from "./types";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
+
+export async function requestCourse(ticker: string) {
+  const response = await fetch(`/api/financial/${ticker}`, {
+    next: { revalidate: 3600 },
+  });
+  return await response.json();
+}
+
+export function calculateCurrentValue(marketPrice: string, owned: Number) {
+  return Number(marketPrice) * Number(owned);
+}
 
 export async function getTickerData(
   ticker: string,
@@ -12,10 +23,7 @@ export async function getTickerData(
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`/api/financial/${ticker}`, {
-        next: { revalidate: 3600 },
-      });
-      const data = await response.json();
+      const data = await requestCourse(ticker);
       setFinanceInformation(data);
     };
 
@@ -26,8 +34,7 @@ export async function getTickerData(
     return <p className="text-right font-medium">Fetching...</p>; // or any other loading indicator
   }
 
-  const currentPrice = Number(financeInformation.regularMarketPrice);
-  const currentValue = currentPrice * Number(owned);
+  const currentValue = calculateCurrentValue(financeInformation.regularMarketPrice, owned)
   const gainOrLoss = currentValue - Number(initialInvestment);
 
   const formatted = new Intl.NumberFormat("fi-FI", {
@@ -58,10 +65,7 @@ export async function getCourseNow(ticker: string, currency: string) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`/api/financial/${ticker}`, {
-        next: { revalidate: 3600 },
-      });
-      const data = await response.json();
+      const data = await requestCourse(ticker);
       setFinanceInformation(data);
     };
 
