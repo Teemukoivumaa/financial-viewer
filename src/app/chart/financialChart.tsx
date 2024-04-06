@@ -98,6 +98,7 @@ async function setHistoryForToday(db: any, id: string): Promise<void> {
           value: modifiedString,
           user: id,
           date: date,
+          env: process.env.NEXT_PUBLIC_env,
         });
       }
     })
@@ -112,24 +113,23 @@ export default function RenderLineChart() {
 
   useEffect(() => {
     // Initialize Firebase app and Firestore
+    const env = process.env;
     const firebaseConfig = {
-      apiKey: process.env.NEXT_PUBLIC_apiKey,
-      authDomain: process.env.NEXT_PUBLIC_authDomain,
-      projectId: process.env.NEXT_PUBLIC_projectId,
-      storageBucket: process.env.NEXT_PUBLIC_storageBucket,
-      messagingSenderId: process.env.NEXT_PUBLIC_messagingSenderId,
-      appId: process.env.NEXT_PUBLIC_appId,
-      measurementId: process.env.NEXT_PUBLIC_measurementId,
+      apiKey: env.NEXT_PUBLIC_apiKey,
+      authDomain: env.NEXT_PUBLIC_authDomain,
+      projectId: env.NEXT_PUBLIC_projectId,
+      storageBucket: env.NEXT_PUBLIC_storageBucket,
+      messagingSenderId: env.NEXT_PUBLIC_messagingSenderId,
+      appId: env.NEXT_PUBLIC_appId,
+      measurementId: env.NEXT_PUBLIC_measurementId,
     };
-
-    console.debug(firebaseConfig);
 
     const app = initializeApp(firebaseConfig);
     setDb(getFirestore(app));
 
     const id = getUserId();
     if (id) setUserId(id);
-  }, []);
+  }, [process]);
 
   // Set financial history for today when db and userId are ready
   useAsync(async () => {
