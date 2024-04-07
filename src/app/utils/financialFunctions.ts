@@ -70,3 +70,19 @@ export function importFinancials(newFinancials: Financial[]) {
 
   toast("Financials imported successfully!");
 }
+
+export function getTotalValueFormatted() {
+  if (typeof window === "undefined") return;
+
+  const totalValueStr = localStorage.getItem("totalValue");
+  if (!totalValueStr) {
+    return;
+  }
+  const totalValueStripped = totalValueStr
+    .replace(",", ".")
+    .replace(/\s/g, "")
+    .replace("€", "")
+    .trim();
+
+  return totalValueStripped;
+}

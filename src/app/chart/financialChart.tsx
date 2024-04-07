@@ -9,9 +9,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Text,
   ResponsiveContainer,
 } from "recharts";
-import { getUserId } from "../utils/financialFunctions";
+import { getTotalValueFormatted, getUserId } from "../utils/financialFunctions";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -25,6 +26,7 @@ import {
   updateDoc,
 } from "firebase/firestore/lite";
 import { getAuth, signInAnonymously } from "firebase/auth";
+import { fetchHistory } from "../utils/getData";
 
 function sortByDateAscending(array: DocumentData[] | { date: string }[]) {
   return array.sort((a, b) => {
@@ -33,6 +35,45 @@ function sortByDateAscending(array: DocumentData[] | { date: string }[]) {
 
     return dateA.getTime() - dateB.getTime();
   });
+}
+
+function sumValuesByDate(data: { value: number; date: string }[]) {
+  const result: { [date: string]: number } = {};
+
+  for (const item of data) {
+    const date = new Date(item.date).toLocaleDateString("fi-FI", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }); // Format the date
+
+    if (result[date]) {
+      result[date] += item.value; // If the date already exists, add the value to it
+    } else {
+      result[date] = item.value; // If it's a new date, initialize it with the value
+    }
+  }
+
+  return Object.keys(result).map((date) => ({ date, value: result[date] }));
+}
+
+async function fetchMissingHistory(history: any[]) {
+  if (history.length >= 5) {
+    return history; // No need to fetch more history if we already have 5 or more entries
+  }
+
+  let newHistory = await fetchHistory();
+
+  const totalValueToday = getTotalValueFormatted();
+
+  if (totalValueToday) {
+    newHistory.push({
+      value: Number(totalValueToday),
+      date: new Date().toISOString(),
+    });
+  }
+
+  return sumValuesByDate(newHistory);
 }
 
 async function getHistory(db: any, id: string): Promise<DocumentData[]> {
@@ -50,7 +91,9 @@ async function getHistory(db: any, id: string): Promise<DocumentData[]> {
   });
 
   // Wait for all promises to resolve
-  const history = await Promise.all(promises);
+  let history = await Promise.all(promises);
+
+  history = await fetchMissingHistory(history);
 
   return history;
 }
@@ -63,7 +106,6 @@ async function setHistoryForToday(db: any, id: string): Promise<void> {
 
   const totalValueStr = localStorage.getItem("totalValue");
   if (!totalValueStr) {
-    console.error("Total value not found in localStorage");
     return;
   }
   const modifiedString = totalValueStr
@@ -106,6 +148,52 @@ async function setHistoryForToday(db: any, id: string): Promise<void> {
       console.error(error);
     });
 }
+
+export const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload?.length) {
+    return (
+      <div className="bg-[#353535] p-3 shadow text-white">
+        <span>{label}</span>
+        <br />
+        {payload.map(
+          (
+            ele: {
+              name: any;
+              value: any;
+            },
+            index: React.Key | null | undefined
+          ) => (
+            <>
+              <small
+                key={index}
+                className="text-xs sm:text-sm font-medium text-white"
+              >
+                {ele.name}: {ele.value}
+              </small>
+              <br />
+            </>
+          )
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
+export const formatYAxis = (tickObject: any) => {
+  const {
+    payload: { value },
+  } = tickObject;
+
+  tickObject["fill"] = "#857F74";
+  // localStorage.getItem("theme") === "light" ? "#000" : "#fff";
+
+  return <Text {...tickObject}>{value}</Text>;
+};
+
+const test = () => {
+  console.debug("hello");
+};
 
 export default function RenderLineChart() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -163,7 +251,7 @@ export default function RenderLineChart() {
       className="max-w-screen-xl mt-10"
       style={{ width: "100%", height: 500 }}
     >
-      <ResponsiveContainer>
+      <ResponsiveContainer className={"text-xs sm:text-sm font-medium"}>
         <AreaChart
           width={1000}
           height={700}
@@ -176,14 +264,22 @@ export default function RenderLineChart() {
           }}
         >
           <CartesianGrid strokeDasharray="3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
+          <XAxis
+            tick={(tickObject) => formatYAxis(tickObject)}
+            dataKey="date"
+          />
+          <YAxis tick={(tickObject) => formatYAxis(tickObject)} />
+          <Tooltip
+            content={<CustomTooltip active={false} payload={[]} label={""} />}
+          />
           <Area
-            type="monotone"
+            className={"text-black"}
+            type="linear"
             dataKey="value"
-            stroke="#8884d8"
-            fill="#8884d8"
+            name="Price"
+            dot={true}
+            stroke="#000"
+            fill="#3C6E71"
           />
         </AreaChart>
       </ResponsiveContainer>

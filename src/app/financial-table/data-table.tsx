@@ -117,12 +117,12 @@ export function DataTable<TData, TValue>({
     } catch (error) {
       throw new Error("Failed to calculate total value");
     }
-  }, [table]);
+  }, [table, refresh]);
 
   return (
     <>
       <div className="flex flex-row justify-between py-4">
-        <div className="flex">
+        <div className="flex flex-wrap">
           <AddFinancial />
 
           {/* Reload */}
@@ -137,9 +137,7 @@ export function DataTable<TData, TValue>({
           {/* Type */}
           <DropdownMenu>
             <DropdownMenuTrigger className="mr-4" asChild>
-              <Button variant="outline" className="ml-auto ">
-                Type
-              </Button>
+              <Button variant="outline">Type</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mr-4">
               {uniqueValues.map((type) => {
@@ -162,38 +160,38 @@ export function DataTable<TData, TValue>({
               })}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
 
-        {/* Columns */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                if (column.id !== "actions") {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => {
-                        column.toggleVisibility(!!value);
-                        setTableColumn(column.id, !!value);
-                      }}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                }
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          {/* Columns */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="md:ml-auto">
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  if (column.id !== "actions") {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => {
+                          column.toggleVisibility(!!value);
+                          setTableColumn(column.id, !!value);
+                        }}
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  }
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
