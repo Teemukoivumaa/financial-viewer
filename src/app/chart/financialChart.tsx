@@ -26,6 +26,8 @@ import {
   updateDoc,
 } from "firebase/firestore/lite";
 import { getAuth, signInAnonymously } from "firebase/auth";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { fetchHistory } from "../utils/getData";
 
 function sortByDateAscending(array: DocumentData[] | { date: string }[]) {
@@ -58,25 +60,19 @@ function sumValuesByDate(data: { value: number; date: string }[]) {
 }
 
 async function fetchMissingHistory(history: any[]) {
-  if (history.length >= 5) {
-    return history; // No need to fetch more history if we already have 5 or more entries
-  }
+  const firstDate = history[0]?.date;
+  const generatedHistory = await fetchHistory(firstDate);
 
-  let newHistory = await fetchHistory();
-
-  const totalValueToday = getTotalValueFormatted();
-
-  if (totalValueToday) {
-    newHistory.push({
-      value: Number(totalValueToday),
-      date: new Date().toISOString(),
-    });
-  }
+  const newHistory = generatedHistory.concat(history);
 
   return sumValuesByDate(newHistory);
 }
 
-async function getHistory(db: any, id: string): Promise<DocumentData[]> {
+async function getHistory(
+  db: any,
+  id: string,
+  generateHistory: boolean
+): Promise<DocumentData[]> {
   const queryHistory = query(
     collection(db, "financialHistory"),
     where("user", "==", id)
@@ -91,11 +87,13 @@ async function getHistory(db: any, id: string): Promise<DocumentData[]> {
   });
 
   // Wait for all promises to resolve
-  let history = await Promise.all(promises);
+  let sortedHistory = sortByDateAscending(await Promise.all(promises));
 
-  history = await fetchMissingHistory(history);
+  if (generateHistory) {
+    sortedHistory = await fetchMissingHistory(sortedHistory);
+  }
 
-  return history;
+  return sortedHistory;
 }
 
 async function setHistoryForToday(db: any, id: string): Promise<void> {
@@ -198,6 +196,7 @@ const test = () => {
 export default function RenderLineChart() {
   const [userId, setUserId] = useState<string | null>(null);
   const [db, setDb] = useState<any>(null);
+  const [generateHistory, setGenerateHistory] = useState(false);
 
   useEffect(() => {
     // Initialize Firebase app and Firestore
@@ -229,10 +228,10 @@ export default function RenderLineChart() {
   // Fetch financial history
   const { loading: loadingHistory, value: history } = useAsync(async () => {
     if (db && userId) {
-      return await getHistory(db, userId);
+      return await getHistory(db, userId, generateHistory);
     }
     return null;
-  }, [db, userId]);
+  }, [db, userId, generateHistory]);
 
   if (loadingHistory) {
     return <div className="mt-10">Loading history...</div>;
@@ -244,18 +243,26 @@ export default function RenderLineChart() {
     );
   }
 
-  const sortedData = sortByDateAscending(history);
-
   return (
     <div
       className="max-w-screen-xl mt-10"
       style={{ width: "100%", height: 500 }}
     >
+      <div className="flex items-center space-x-2 mb-4">
+        <Switch
+          id="automatic-generation"
+          checked={generateHistory}
+          onCheckedChange={(value) => setGenerateHistory(value)}
+        />
+        <Label htmlFor="automatic-generation">
+          Automatic generation (Experimental)
+        </Label>
+      </div>
       <ResponsiveContainer className={"text-xs sm:text-sm font-medium"}>
         <AreaChart
           width={1000}
           height={700}
-          data={sortedData ?? []}
+          data={history ?? []}
           margin={{
             top: 10,
             right: 30,
