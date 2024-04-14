@@ -9,10 +9,9 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Text,
   ResponsiveContainer,
 } from "recharts";
-import { getTotalValueFormatted, getUserId } from "../utils/financialFunctions";
+import { getUserId } from "../utils/financialFunctions";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -29,6 +28,17 @@ import { getAuth, signInAnonymously } from "firebase/auth";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { fetchHistory } from "../utils/getData";
+import { generateTodaysDate } from "../utils/date";
+import { CustomTooltip, formatAxis } from "./chartCustomization";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function sortByDateAscending(array: DocumentData[] | { date: string }[]) {
   return array.sort((a, b) => {
@@ -43,11 +53,7 @@ function sumValuesByDate(data: { value: number; date: string }[]) {
   const result: { [date: string]: number } = {};
 
   for (const item of data) {
-    const date = new Date(item.date).toLocaleDateString("fi-FI", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }); // Format the date
+    const date = new Date(item.date).toLocaleDateString();
 
     if (result[date]) {
       result[date] += item.value; // If the date already exists, add the value to it
@@ -56,22 +62,40 @@ function sumValuesByDate(data: { value: number; date: string }[]) {
     }
   }
 
-  return Object.keys(result).map((date) => ({ date, value: result[date] }));
+  const values = Object.keys(result).map((date) => ({
+    date,
+    value: Number(result[date]).toFixed(2),
+  }));
+
+  return values;
 }
 
-async function fetchMissingHistory(history: any[]) {
-  const firstDate = history[0]?.date;
-  const generatedHistory = await fetchHistory(firstDate);
+function formatDates(data: DocumentData[]) {
+  return data.map((item) => {
+    return {
+      value: item.value,
+      date: new Date(item.date).toLocaleDateString(),
+    };
+  });
+}
 
-  const newHistory = generatedHistory.concat(history);
+async function fetchMissingHistory(
+  firstDate: string,
+  history: any[],
+  days: Number
+) {
+  const generatedHistory = await fetchHistory(firstDate, days);
 
-  return sumValuesByDate(newHistory);
+  const newHistory = sumValuesByDate(generatedHistory.concat(history));
+
+  return sortByDateAscending(newHistory);
 }
 
 async function getHistory(
   db: any,
   id: string,
-  generateHistory: boolean
+  generateHistory: boolean,
+  days: Number
 ): Promise<DocumentData[]> {
   const queryHistory = query(
     collection(db, "financialHistory"),
@@ -86,21 +110,26 @@ async function getHistory(
     return values;
   });
 
+  const rawHistory = await Promise.all(promises);
+
+  const history = formatDates(rawHistory);
+
   // Wait for all promises to resolve
-  let sortedHistory = sortByDateAscending(await Promise.all(promises));
+  let sortedHistory = sortByDateAscending(history);
 
   if (generateHistory) {
-    sortedHistory = await fetchMissingHistory(sortedHistory);
+    sortedHistory = await fetchMissingHistory(
+      sortedHistory[0]?.date,
+      rawHistory,
+      days
+    );
   }
 
   return sortedHistory;
 }
 
 async function setHistoryForToday(db: any, id: string): Promise<void> {
-  const today = new Date();
-  const date = `${today.getDate()}.${
-    today.getMonth() + 1
-  }.${today.getFullYear()}`;
+  const today = generateTodaysDate();
 
   const totalValueStr = localStorage.getItem("totalValue");
   if (!totalValueStr) {
@@ -115,7 +144,7 @@ async function setHistoryForToday(db: any, id: string): Promise<void> {
   const historyCollection = collection(db, "financialHistory");
   const queryHistory = query(
     historyCollection,
-    where("date", "==", date),
+    where("date", "==", today),
     where("user", "==", id)
   );
   const querySnapshot = await getDocs(queryHistory);
@@ -137,7 +166,7 @@ async function setHistoryForToday(db: any, id: string): Promise<void> {
         await addDoc(historyCollection, {
           value: modifiedString,
           user: id,
-          date: date,
+          date: today,
           env: process.env.NEXT_PUBLIC_env,
         });
       }
@@ -147,56 +176,11 @@ async function setHistoryForToday(db: any, id: string): Promise<void> {
     });
 }
 
-export const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload?.length) {
-    return (
-      <div className="bg-[#353535] p-3 shadow text-white">
-        <span>{label}</span>
-        <br />
-        {payload.map(
-          (
-            ele: {
-              name: any;
-              value: any;
-            },
-            index: React.Key | null | undefined
-          ) => (
-            <>
-              <small
-                key={index}
-                className="text-xs sm:text-sm font-medium text-white"
-              >
-                {ele.name}: {ele.value}
-              </small>
-              <br />
-            </>
-          )
-        )}
-      </div>
-    );
-  }
-  return null;
-};
-
-export const formatYAxis = (tickObject: any) => {
-  const {
-    payload: { value },
-  } = tickObject;
-
-  tickObject["fill"] = "#857F74";
-  // localStorage.getItem("theme") === "light" ? "#000" : "#fff";
-
-  return <Text {...tickObject}>{value}</Text>;
-};
-
-const test = () => {
-  console.debug("hello");
-};
-
 export default function RenderLineChart() {
   const [userId, setUserId] = useState<string | null>(null);
   const [db, setDb] = useState<any>(null);
   const [generateHistory, setGenerateHistory] = useState(false);
+  const [days, setDays] = useState(30);
 
   useEffect(() => {
     // Initialize Firebase app and Firestore
@@ -226,22 +210,12 @@ export default function RenderLineChart() {
   }, [db, userId]);
 
   // Fetch financial history
-  const { loading: loadingHistory, value: history } = useAsync(async () => {
+  const { value: history } = useAsync(async () => {
     if (db && userId) {
-      return await getHistory(db, userId, generateHistory);
+      return await getHistory(db, userId, generateHistory, days);
     }
     return null;
-  }, [db, userId, generateHistory]);
-
-  if (loadingHistory) {
-    return <div className="mt-10">Loading history...</div>;
-  }
-
-  if (!history) {
-    return (
-      <div className="mt-10">No history data found yet. Refresh the page.</div>
-    );
-  }
+  }, [db, userId, generateHistory, days]);
 
   return (
     <div
@@ -257,6 +231,23 @@ export default function RenderLineChart() {
         <Label htmlFor="automatic-generation">
           Automatic generation (Experimental)
         </Label>
+        {generateHistory ? (
+          <Select
+            onValueChange={(value) => setDays(Number(value))}
+            defaultValue={String(days)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Days to generate?" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="30">30 Days</SelectItem>
+              <SelectItem value="60">60 Days</SelectItem>
+              <SelectItem value="90">90 Days</SelectItem>
+            </SelectContent>
+          </Select>
+        ) : (
+          ""
+        )}
       </div>
       <ResponsiveContainer className={"text-xs sm:text-sm font-medium"}>
         <AreaChart
@@ -265,17 +256,15 @@ export default function RenderLineChart() {
           data={history ?? []}
           margin={{
             top: 10,
-            right: 30,
-            left: 0,
-            bottom: 0,
           }}
         >
           <CartesianGrid strokeDasharray="3" />
           <XAxis
-            tick={(tickObject) => formatYAxis(tickObject)}
+            tick={(tickObject) => formatAxis(tickObject)}
             dataKey="date"
+            interval={"preserveStartEnd"}
           />
-          <YAxis tick={(tickObject) => formatYAxis(tickObject)} />
+          <YAxis tick={(tickObject) => formatAxis(tickObject)} />
           <Tooltip
             content={<CustomTooltip active={false} payload={[]} label={""} />}
           />
