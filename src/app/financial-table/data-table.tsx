@@ -74,13 +74,13 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const uniqueValues = React.useMemo(() => {
+  const types = React.useMemo(() => {
     let values = table
       .getCoreRowModel()
       .flatRows.map((row) => row.getValue("type")) as string[];
     values.unshift("All");
     return Array.from(new Set(values));
-  }, [table]);
+  }, [table, refresh]);
 
   const filterValue = columnFilters?.[0]?.value;
 
@@ -94,6 +94,11 @@ export function DataTable<TData, TValue>({
 
       const totalValue = await Promise.all(
         rows.map(async (row) => {
+          const type = row.getValue("type") as string;
+          if (filterValue && type !== filterValue) {
+            return 0;
+          }
+
           const ticker = row.getValue("ticker") as string;
           const owned = Number(row.getValue("owned"));
 
@@ -117,7 +122,7 @@ export function DataTable<TData, TValue>({
     } catch (error) {
       throw new Error("Failed to calculate total value");
     }
-  }, [table, refresh]);
+  }, [table, refresh, filterValue]);
 
   return (
     <>
@@ -140,7 +145,7 @@ export function DataTable<TData, TValue>({
               <Button variant="outline">Type</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mr-4">
-              {uniqueValues.map((type) => {
+              {types.map((type) => {
                 return (
                   <DropdownMenuCheckboxItem
                     key={type}

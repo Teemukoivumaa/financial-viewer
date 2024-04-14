@@ -22,8 +22,7 @@ export function setTableColumn(column: string, state: boolean) {
   localStorage.setItem("table-settings", JSON.stringify(newTableSettings));
 }
 
-export async function fetchHistory(firstHistory: string) {
-  console.debug(firstHistory);
+export async function fetchHistory(firstHistory: string, days: Number) {
   const financials: [Financial] = getData();
 
   let inputDate = null;
@@ -39,18 +38,14 @@ export async function fetchHistory(firstHistory: string) {
     inputDate = new Date();
   }
 
-  // Create a new date object 30 days ago from the input date
-  const thirtyDaysAgo: Date = new Date(inputDate);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const inputDaysAgo: Date = new Date(inputDate);
+  inputDaysAgo.setDate(inputDaysAgo.getDate() - Number(days));
 
-  const formattedDate = `${thirtyDaysAgo.getFullYear()}-${(
-    thirtyDaysAgo.getMonth() + 1
+  const formattedDate = `${inputDaysAgo.getFullYear()}-${(
+    inputDaysAgo.getMonth() + 1
   )
     .toString()
-    .padStart(2, "0")}-${thirtyDaysAgo.getDate().toString().padStart(2, "0")}`;
-
-  console.log(formattedDate);
-  console.log(formattedInput);
+    .padStart(2, "0")}-${inputDaysAgo.getDate().toString().padStart(2, "0")}`;
 
   let newHistory: { value: number; date: any }[] = [];
 
@@ -69,13 +64,12 @@ export async function fetchHistory(firstHistory: string) {
     financialHistories.map((financialHistory: { close: any; date: any }) => {
       const closeAmount = financialHistory.close;
       const date = financialHistory.date;
-      const price = closeAmount * financial.owned;
 
-      newHistory.push({ value: price, date: date });
+      const price = (closeAmount * financial.owned).toFixed(3);
+
+      newHistory.push({ value: Number(price), date: date });
     });
   }
-
-  console.debug(newHistory);
 
   return newHistory;
 }
