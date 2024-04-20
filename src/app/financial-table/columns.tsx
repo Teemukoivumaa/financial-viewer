@@ -23,9 +23,9 @@ import {
 import { ModifyFinancial } from "../modifyFinancial/modifyFields";
 import useFinancialState from "../modifyFinancial/useFinancialState";
 import { deleteFinancial, saveFinancial } from "../utils/financialFunctions";
-import { getTickerData, getCourseNow } from "../utils/getTableInfo";
-import { Suspense } from "react";
 import { Financial } from "../utils/types";
+import { Suspense } from "react";
+import { getTickerData, getCourseNow } from "../utils/getTableInfo";
 
 export const columns: ColumnDef<Financial>[] = [
   {

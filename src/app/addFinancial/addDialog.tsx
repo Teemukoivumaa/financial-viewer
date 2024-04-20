@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AddFinancialFields } from "./addFields";
 import { Search } from "../search/search";
 
 export function AddFinancial() {
@@ -31,6 +32,8 @@ export function AddFinancial() {
             Search for the financial you would like to add
           </DialogDescription>
         </DialogHeader>
+
+        {/* <AddFinancialFields /> */}
 
         <Search setOpen={setOpen} />
 

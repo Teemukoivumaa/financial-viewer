@@ -29,9 +29,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { getData, getTableColumn, setTableColumn } from "../utils/getData";
-import { calculateCurrentValue, requestCourse } from "../utils/getTableInfo";
-import useAsync from "react-use/lib/useAsync";
 import { AddFinancial } from "../addFinancial/addDialog";
+import {
+  calculateAllInitialInvestment,
+  calculateAllValueNow,
+} from "../utils/getTotalValue";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -74,6 +76,42 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  let columnsHidden = 0;
+
+  for (const key in columnVisibility) {
+    if (
+      columnVisibility.hasOwnProperty(key) &&
+      columnVisibility[key] === false
+    ) {
+      columnsHidden++;
+    }
+  }
+
+  let initialVisible = true;
+  let nowVisible = true;
+
+  for (const key in columnVisibility) {
+    if (
+      key === "amount now" &&
+      columnVisibility.hasOwnProperty(key) &&
+      columnVisibility[key] === false
+    ) {
+      nowVisible = false;
+    } else if (key === "amount now") {
+      nowVisible = true;
+    }
+
+    if (
+      key === "amount" &&
+      columnVisibility.hasOwnProperty(key) &&
+      columnVisibility[key] === false
+    ) {
+      initialVisible = false;
+    } else if (key === "amount") {
+      initialVisible = true;
+    }
+  }
+
   const types = React.useMemo(() => {
     let values = table
       .getCoreRowModel()
@@ -82,47 +120,16 @@ export function DataTable<TData, TValue>({
     return Array.from(new Set(values));
   }, [table, refresh]);
 
-  const filterValue = columnFilters?.[0]?.value;
+  const filterValue = columnFilters?.[0]?.value as string;
 
-  const { loading, value } = useAsync(async () => {
-    try {
-      const rows = table.getCoreRowModel().flatRows;
+  const { loading: loadingInitial, value: valueAllInitial } =
+    calculateAllInitialInvestment(table, filterValue, refresh);
 
-      if (rows?.length <= 0) {
-        return "";
-      }
-
-      const totalValue = await Promise.all(
-        rows.map(async (row) => {
-          const type = row.getValue("type") as string;
-          if (filterValue && type !== filterValue) {
-            return 0;
-          }
-
-          const ticker = row.getValue("ticker") as string;
-          const owned = Number(row.getValue("owned"));
-
-          const { regularMarketPrice } = await requestCourse(ticker);
-
-          return calculateCurrentValue(regularMarketPrice, owned);
-        })
-      );
-
-      // Calculate the sum of all current values
-      const sumValue = totalValue.reduce((acc, curr) => acc + curr, 0);
-
-      const formatted = new Intl.NumberFormat("fi-FI", {
-        style: "currency",
-        currency: `EUR`,
-      }).format(sumValue);
-
-      localStorage.setItem("totalValue", formatted);
-
-      return formatted;
-    } catch (error) {
-      throw new Error("Failed to calculate total value");
-    }
-  }, [table, refresh, filterValue]);
+  const { loading: loadingNow, value: valueAllNow } = calculateAllValueNow(
+    table,
+    filterValue,
+    refresh
+  );
 
   return (
     <>
@@ -247,15 +254,30 @@ export function DataTable<TData, TValue>({
             )}
 
             <TableRow>
-              <TableCell colSpan={1} className="font-medium text-left">
-                Total
-              </TableCell>
-              <TableCell
-                colSpan={columns.length - 2}
-                className="font-medium text-right"
-              >
-                {loading ? "Loading..." : `${value}`}
-              </TableCell>
+              <TableCell className="font-medium text-left">Total</TableCell>
+              {initialVisible && (
+                <TableCell
+                  className="font-medium text-right"
+                  colSpan={
+                    nowVisible
+                      ? columns.length - columnsHidden - 4
+                      : columns.length - columnsHidden - 3
+                  }
+                >
+                  {loadingInitial ? "Loading..." : `${valueAllInitial}`}
+                </TableCell>
+              )}
+
+              {nowVisible && (
+                <TableCell
+                  className="font-medium text-right"
+                  colSpan={
+                    initialVisible ? 2 : columns.length - columnsHidden - 2
+                  }
+                >
+                  {loadingNow ? "Loading..." : `${valueAllNow}`}
+                </TableCell>
+              )}
             </TableRow>
           </TableBody>
         </Table>

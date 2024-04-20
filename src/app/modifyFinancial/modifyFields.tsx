@@ -17,12 +17,14 @@ export function ModifyFinancial({ financial, states }: ModifyProps) {
     setValue((Number(owned) * Number(course)).toFixed(3));
   }, [owned, course, setValue]);
 
+  const step = financial.type.toLocaleLowerCase() === "stock" ? "1" : "0.1";
+
   return (
     <div className="grid w-full items-center gap-4">
       <Label htmlFor="owned">Amount owned</Label>
       <Input
         type="number"
-        step="0.1"
+        step={step}
         id="owned"
         placeholder="Amount owned"
         value={owned}
