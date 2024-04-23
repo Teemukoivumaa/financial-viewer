@@ -20,3 +20,8 @@ export interface StockInformation {
   regularMarketPrice: string;
   currency: string;
 }
+
+export interface AddFinance {
+  financial: ParsedFinancial;
+  info: StockInformation;
+}

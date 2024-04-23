@@ -2,48 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Suspense } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { ParsedFinancial, StockInformation } from "../utils/types";
-
-function addFinancial(
-  financial: ParsedFinancial,
-  financialInformation: StockInformation,
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  if (typeof window === "undefined" || financial === undefined) return;
-
-  const financialObject = JSON.parse(
-    localStorage.getItem("financials") || "[]"
-  );
-
-  const type = financial.typeDisp !== "Equity" ? financial.typeDisp : "Stock";
-
-  financialObject?.push({
-    title: financial.shortname,
-    ticker: financial.symbol,
-    date: new Date().toLocaleDateString(),
-    type: type,
-    amount: 0,
-    owned: 1,
-    course: financialInformation.regularMarketPrice,
-    currency: financialInformation.currency,
-  });
-
-  localStorage.setItem("financials", JSON.stringify(financialObject));
-
-  toast("New financial has been added!");
-
-  setTimeout(() => {
-    setOpen(false);
-  }, 500);
-}
+import { ParsedFinancial, StockInformation } from "../../utils/types";
+import { AddFinance } from "../addFields";
 
 async function returnFinancial(
   financial: ParsedFinancial,
   index: number,
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setFinance: any
 ) {
   const response = await fetch(`/api/financial/${financial.symbol}`, {
     next: { revalidate: 3600 },
@@ -54,7 +21,12 @@ async function returnFinancial(
   return (
     <li key={index}>
       <div
-        onClick={() => addFinancial(financial, financeInformation, setOpen)}
+        onClick={() =>
+          setFinance({
+            financial: financial,
+            info: financeInformation,
+          } as AddFinance)
+        }
         className="cursor-pointer dark:hover:bg-gray-900 hover:bg-gray-200 transition-colors duration-300 ease-in-out rounded p-2 flex flex-row"
       >
         <div className="basis-1/2">
@@ -86,10 +58,7 @@ async function returnFinancial(
   );
 }
 
-async function searchFinancial(
-  searchQuery: string,
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-) {
+async function searchFinancial(searchQuery: string, setFinance: any) {
   if (searchQuery.length <= 0)
     return <p className="text-md">Type something to search</p>;
 
@@ -107,7 +76,7 @@ async function searchFinancial(
       <ul className="mt-4">
         {financial.map(
           async (financial: ParsedFinancial, index: number) =>
-            await returnFinancial(financial, index, setOpen)
+            await returnFinancial(financial, index, setFinance)
         )}
       </ul>
     </>
@@ -115,10 +84,10 @@ async function searchFinancial(
 }
 
 interface SearchProps {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setFinance: any;
 }
 
-export function Search({ setOpen }: SearchProps) {
+export function Search({ setFinance }: SearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchResult, setSearchResult] = useState(null as any);
@@ -142,15 +111,25 @@ export function Search({ setOpen }: SearchProps) {
     }
     // Perform the search after 3000ms debounce
     const delayDebounceFn = setTimeout(() => {
-      setSearchResult(searchFinancial(searchQuery, setOpen));
+      setSearchResult(searchFinancial(searchQuery, setFinance));
       setSearching(false);
     }, 2000);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, setOpen]);
+  }, [searchQuery, setFinance]);
 
   return (
     <>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setFinance({} as AddFinance);
+        }}
+        className="mb-2"
+      >
+        Add manually
+      </Button>
+
       <div className="flex items-center">
         <Input
           type="text"
