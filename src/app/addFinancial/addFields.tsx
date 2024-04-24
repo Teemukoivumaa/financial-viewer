@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,12 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ParsedFinancial, StockInformation } from "../utils/types";
-
-export interface AddFinance {
-  financial: ParsedFinancial;
-  info: StockInformation;
-}
+import { AddFinance } from "../utils/types";
 
 interface AddProps {
   financeDetails: AddFinance;
@@ -23,40 +16,25 @@ interface AddProps {
 }
 
 export function AddFinancialFields({ financeDetails, states }: AddProps) {
-  const { financial, info: financialInfo } = financeDetails;
-  const [currency, setCurrency] = useState(financialInfo?.currency);
-
-  const {
-    type,
-    setType,
-    name,
-    setName,
-    owned,
-    setOwned,
-    course,
-    setCourse,
-    value,
-    setValue,
-    expenseRatio,
-    setExpenseRatio,
-    interestRate,
-    setInterestRate,
-    openDate,
-    setOpenDate,
-  } = states;
-
-  console.debug(currency);
+  const { info: financialInfo } = financeDetails;
 
   useEffect(() => {
-    setValue((Number(owned) * Number(course)).toFixed(3));
-  }, [owned, course, setValue]);
+    if (states.type !== "account") {
+      const calculatedValue = (
+        Number(states.owned) * Number(states.course)
+      ).toFixed(3);
+      if (calculatedValue !== states.value) {
+        states.setValue(calculatedValue);
+      }
+    }
+  }, [states.owned, states.course, states.setValue, states.value, states.type]);
 
   return (
     <div className="grid w-full items-center gap-4">
       <Label htmlFor="type">Type</Label>
       <Select
-        onValueChange={(value) => setType(value)}
-        defaultValue={String(type)}
+        onValueChange={(value) => states.setType(value)}
+        defaultValue={String(states.type)}
       >
         <SelectTrigger id="type" aria-label="Select type">
           <SelectValue placeholder="Select type" />
@@ -76,24 +54,24 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             type="string"
             id="currency"
             placeholder="Currency"
-            value={currency}
+            value={states.currency}
             onChange={(e) => {
-              setCurrency(e.target.value);
+              states.setCurrency(e.target.value);
             }}
           />
         </>
       )}
 
-      {type === "stock" ? (
+      {states.type === "stock" ? (
         <>
           <Label htmlFor="name">Stock name</Label>
           <Input
             type="string"
             id="name"
             placeholder="Name"
-            value={name}
+            value={states.name}
             onChange={(e) => {
-              setName(e.target.value);
+              states.setName(e.target.value);
             }}
           />
 
@@ -103,53 +81,53 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             id="amount"
             placeholder="1"
             step="1"
-            value={owned}
+            value={states.owned}
             onChange={(e) => {
-              setOwned(e.target.value);
+              states.setOwned(e.target.value);
             }}
           />
 
           <Label htmlFor="currentPrice">
-            Current market price ({currency})
+            Current market price ({states.currency})
           </Label>
           <Input
             type="number"
             id="currentPrice"
             placeholder="100"
             step="1"
-            value={course}
+            value={states.course}
             onChange={(e) => {
-              setCourse(e.target.value);
+              states.setCourse(e.target.value);
             }}
           />
 
           <Label htmlFor="price">
-            Purchase price per share currency ({currency})
+            Purchase price per share currency ({states.currency})
           </Label>
           <Input
             type="number"
             id="price"
             placeholder="100"
             step="1"
-            value={value}
+            value={states.value}
             onChange={(e) => {
-              setValue(e.target.value);
+              states.setValue(e.target.value);
             }}
           />
         </>
       ) : (
         ""
       )}
-      {type === "fund" || type === "etf" ? (
+      {states.type === "fund" || states.type === "etf" ? (
         <>
           <Label htmlFor="name">Fund / ETF name</Label>
           <Input
             type="string"
             id="name"
             placeholder="Name"
-            value={name}
+            value={states.name}
             onChange={(e) => {
-              setName(e.target.value);
+              states.setName(e.target.value);
             }}
           />
 
@@ -159,37 +137,37 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             id="amount"
             placeholder="1"
             step="1"
-            value={owned}
+            value={states.owned}
             onChange={(e) => {
-              setOwned(e.target.value);
+              states.setOwned(e.target.value);
             }}
           />
 
           <Label htmlFor="currentPrice">
-            Current market price ({currency})
+            Current market price ({states.currency})
           </Label>
           <Input
             type="number"
             id="currentPrice"
             placeholder="100"
             step="1"
-            value={course}
+            value={states.course}
             onChange={(e) => {
-              setCourse(e.target.value);
+              states.setCourse(e.target.value);
             }}
           />
 
           <Label htmlFor="price">
-            Purchase price per unit / share ({currency})
+            Purchase price per unit / share ({states.currency})
           </Label>
           <Input
             type="number"
             id="price"
             placeholder="100"
             step="1"
-            value={value}
+            value={states.value}
             onChange={(e) => {
-              setValue(e.target.value);
+              states.setValue(e.target.value);
             }}
           />
 
@@ -199,9 +177,9 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             id="expenseRatio"
             placeholder="0.01%"
             step="0.01"
-            value={expenseRatio}
+            value={states.expenseRatio}
             onChange={(e) => {
-              setExpenseRatio(e.target.value);
+              states.setExpenseRatio(e.target.value);
             }}
           />
         </>
@@ -209,16 +187,16 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
         ""
       )}
 
-      {type === "account" ? (
+      {states.type === "account" ? (
         <>
           <Label htmlFor="name">Account name</Label>
           <Input
             type="string"
             id="name"
             placeholder="Name"
-            value={name}
+            value={states.name}
             onChange={(e) => {
-              setName(e.target.value);
+              states.setName(e.target.value);
             }}
           />
 
@@ -228,9 +206,9 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             id="amount"
             placeholder="1"
             step="1"
-            value={interestRate}
+            value={states.interestRate}
             onChange={(e) => {
-              setInterestRate(e.target.value);
+              states.setInterestRate(e.target.value);
             }}
           />
 
@@ -240,9 +218,9 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             id="balance"
             placeholder="100"
             step="1"
-            value={value}
+            value={states.value}
             onChange={(e) => {
-              setValue(e.target.value);
+              states.setValue(e.target.value);
             }}
           />
 
@@ -252,9 +230,9 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             id="expenseRatio"
             placeholder="0.01%"
             step="0.01"
-            value={expenseRatio}
+            value={states.expenseRatio}
             onChange={(e) => {
-              setExpenseRatio(e.target.value);
+              states.setExpenseRatio(e.target.value);
             }}
           />
 
@@ -263,9 +241,9 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             type="date"
             id="openDate"
             placeholder="01.01.2024"
-            value={openDate}
+            value={states.openDate}
             onChange={(e) => {
-              setOpenDate(e.target.value);
+              states.setOpenDate(e.target.value);
             }}
           />
         </>
@@ -273,16 +251,16 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
         ""
       )}
 
-      {type === "cryptocurrency" ? (
+      {states.type === "cryptocurrency" ? (
         <>
           <Label htmlFor="name">Cryptocurrency name</Label>
           <Input
             type="string"
             id="name"
             placeholder="Name"
-            value={name}
+            value={states.name}
             onChange={(e) => {
-              setName(e.target.value);
+              states.setName(e.target.value);
             }}
           />
 
@@ -292,35 +270,37 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             id="amount"
             placeholder="1"
             step="1"
-            value={owned}
+            value={states.owned}
             onChange={(e) => {
-              setOwned(e.target.value);
+              states.setOwned(e.target.value);
             }}
           />
 
           <Label htmlFor="currentPrice">
-            Current market price ({currency})
+            Current market price ({states.currency})
           </Label>
           <Input
             type="number"
             id="currentPrice"
             placeholder="100"
             step="1"
-            value={course}
+            value={states.course}
             onChange={(e) => {
-              setCourse(e.target.value);
+              states.setCourse(e.target.value);
             }}
           />
 
-          <Label htmlFor="price">Purchase price per unit ({currency})</Label>
+          <Label htmlFor="price">
+            Purchase price per unit ({states.currency})
+          </Label>
           <Input
             type="number"
             id="price"
             placeholder="100"
             step="1"
-            value={value}
+            value={states.value}
             onChange={(e) => {
-              setValue(e.target.value);
+              states.setValue(e.target.value);
             }}
           />
         </>
