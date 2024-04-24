@@ -4,8 +4,11 @@ import { Separator } from "@/components/ui/separator";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { ParsedFinancial, StockInformation } from "../../utils/types";
-import { AddFinance } from "../addFields";
+import {
+  AddFinance,
+  ParsedFinancial,
+  StockInformation,
+} from "../../utils/types";
 
 async function returnFinancial(
   financial: ParsedFinancial,

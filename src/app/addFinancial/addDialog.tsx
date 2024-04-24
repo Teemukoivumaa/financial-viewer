@@ -1,10 +1,7 @@
-"use client";
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -15,32 +12,73 @@ import {
 import { AddFinancialFields } from "./addFields";
 import { Search } from "./search/search";
 import { toast } from "sonner";
-import { ParsedFinancial, StockInformation, AddFinance } from "../utils/types";
+import { AddFinance, FinancialProductType } from "../utils/types";
 import useNewFinancialState from "./useNewFinancialState";
 
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.getMonth() + 1; // Month is zero-based
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+}
+
+function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+const typing = ["ETF", "Fund"];
+
 function addFinancial(
-  financial: ParsedFinancial,
-  financialInformation: StockInformation,
+  states: any,
+  financial: AddFinance,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  if (typeof window === "undefined" || financial === undefined) return;
+  if (typeof window === "undefined") return;
 
   const financialObject = JSON.parse(
     localStorage.getItem("financials") || "[]"
   );
 
-  const type = financial.typeDisp !== "Equity" ? financial.typeDisp : "Stock";
+  const type = capitalizeFirstLetter(states.type);
 
-  financialObject?.push({
-    title: financial.shortname,
-    ticker: financial.symbol,
-    date: new Date().toLocaleDateString(),
-    type: type,
-    amount: 0,
-    owned: 1,
-    course: financialInformation.regularMarketPrice,
-    currency: financialInformation.currency,
-  });
+  if (type !== "Account") {
+    financialObject?.push({
+      title: states.name,
+      ticker: financial.financial.symbol,
+      date: new Date().toLocaleDateString(),
+      type: type,
+      amount: states.value,
+      owned: states.owned,
+      course: states.course,
+      currency: states.currency,
+    });
+  } else if (type === typing[0] || type === typing[1]) {
+    financialObject?.push({
+      title: states.name,
+      ticker: financial.financial.symbol,
+      date: new Date().toLocaleDateString(),
+      type: type,
+      amount: states.value,
+      owned: states.owned,
+      course: states.course,
+      currency: states.currency,
+      expenseRatio: states.expenseRatio,
+    });
+  } else {
+    financialObject?.push({
+      title: states.name,
+      ticker: "",
+      date: formatDate(states.openDate),
+      type: type,
+      amount: states.value,
+      owned: "1",
+      course: "0",
+      currency: states.currency,
+      interest: states.interestRate,
+      expenseRatio: states.expenseRatio,
+    });
+  }
 
   localStorage.setItem("financials", JSON.stringify(financialObject));
 
@@ -49,32 +87,69 @@ function addFinancial(
   setTimeout(() => {
     setOpen(false);
   }, 500);
+
+  return true;
 }
 
 export function AddFinancial() {
   const [open, setOpen] = useState(false);
+  const [finance, setFinance] = useState<AddFinance | undefined>(undefined);
+  const states = useNewFinancialState(finance);
 
-  const states = useNewFinancialState();
+  // useEffect(() => {
+  //   if (finance && finance.financial && finance.info) {
+  //     const { typeDisp, shortname } = finance.financial;
+  //     const { regularMarketPrice, currency } = finance.info;
 
-  const [finance, setFinance] = useState(undefined as unknown as AddFinance);
+  //     states.setType(typeDisp !== "Equity" ? typeDisp.toLowerCase() : "stock");
+  //     states.setName(shortname);
+  //     states.setCourse(regularMarketPrice);
+  //     states.setCurrency(currency);
+  //   }
+  // }, [finance, states]);
 
-  if (finance) {
-    if (!states.type && finance.financial) {
-      states.setType(
-        finance.financial.typeDisp !== "Equity"
-          ? finance.financial.typeDisp.toLocaleLowerCase()
-          : "stock"
-      );
+  const clearChosen = () => {
+    setFinance(undefined);
+    states.dispatch({
+      type: "SET_FINANCE_DETAILS",
+      payload: {
+        type: "stock",
+        name: null,
+        owned: null,
+        course: null,
+        value: null,
+        expenseRatio: null,
+        interestRate: null,
+        openDate: null,
+        currency: null,
+      },
+    });
+  };
+
+  const handleSubmit = () => {
+    if (finance) {
+      const result = addFinancial(states, finance, setOpen);
+      if (result) {
+        setTimeout(() => {
+          setFinance(undefined);
+          states.dispatch({
+            type: "SET_FINANCE_DETAILS",
+            payload: {
+              type: "stock",
+              name: null,
+              owned: null,
+              course: null,
+              value: null,
+              expenseRatio: null,
+              interestRate: null,
+              openDate: null,
+              currency: null,
+            },
+          });
+        }, 500);
+      }
     }
-
-    if (!states.name && finance.financial) {
-      states.setName(finance.financial.shortname);
-    }
-
-    if (!states.course && finance.info) {
-      states.setCourse(finance.info.regularMarketPrice);
-    }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -101,22 +176,14 @@ export function AddFinancial() {
           <Button
             type="reset"
             variant="destructive"
-            disabled={finance ? false : true}
-            onClick={() => {
-              setFinance(undefined as unknown as AddFinance);
-            }}
+            disabled={!finance}
+            onClick={clearChosen}
             className="mt-10 sm:mt-0"
           >
             Clear chosen
           </Button>
 
-          <Button
-            type="submit"
-            disabled={finance ? false : true}
-            onClick={() => {
-              setFinance(undefined as unknown as AddFinance);
-            }}
-          >
+          <Button type="submit" disabled={!finance} onClick={handleSubmit}>
             Save
           </Button>
         </DialogFooter>

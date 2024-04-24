@@ -25,3 +25,5 @@ export interface AddFinance {
   financial: ParsedFinancial;
   info: StockInformation;
 }
+
+export type FinancialProductType = "ETF" | "Fund";
