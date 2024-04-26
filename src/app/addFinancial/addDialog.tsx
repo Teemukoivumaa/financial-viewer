@@ -45,7 +45,7 @@ function addFinancial(
   if (type !== "Account") {
     financialObject?.push({
       title: states.name,
-      ticker: financial.financial.symbol,
+      ticker: states.ticker,
       date: new Date().toLocaleDateString(),
       type: type,
       amount: states.value,
@@ -56,7 +56,7 @@ function addFinancial(
   } else if (type === typing[0] || type === typing[1]) {
     financialObject?.push({
       title: states.name,
-      ticker: financial.financial.symbol,
+      ticker: states.ticker,
       date: new Date().toLocaleDateString(),
       type: type,
       amount: states.value,
@@ -95,18 +95,6 @@ export function AddFinancial() {
   const [open, setOpen] = useState(false);
   const [finance, setFinance] = useState<AddFinance | undefined>(undefined);
   const states = useNewFinancialState(finance);
-
-  // useEffect(() => {
-  //   if (finance && finance.financial && finance.info) {
-  //     const { typeDisp, shortname } = finance.financial;
-  //     const { regularMarketPrice, currency } = finance.info;
-
-  //     states.setType(typeDisp !== "Equity" ? typeDisp.toLowerCase() : "stock");
-  //     states.setName(shortname);
-  //     states.setCourse(regularMarketPrice);
-  //     states.setCurrency(currency);
-  //   }
-  // }, [finance, states]);
 
   const clearChosen = () => {
     setFinance(undefined);

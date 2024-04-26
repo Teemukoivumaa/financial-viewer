@@ -4,6 +4,7 @@ import { AddFinance } from "../utils/types";
 const initialState = {
   type: "",
   name: "",
+  ticker: "",
   owned: 0,
   course: "",
   value: 0,
@@ -18,6 +19,8 @@ function reducer(state: any, action: any) {
     case "SET_TYPE":
       return { ...state, type: action.payload };
     case "SET_NAME":
+      return { ...state, name: action.payload };
+    case "SET_TICKER":
       return { ...state, name: action.payload };
     case "SET_OWNED":
       return { ...state, owned: action.payload };
@@ -38,6 +41,7 @@ function reducer(state: any, action: any) {
         ...state,
         type: action.payload.type,
         name: action.payload.name,
+        ticker: action.payload.ticker,
         owned: action.payload.owned,
         course: action.payload.course,
         value: action.payload.value,
@@ -57,7 +61,7 @@ function useNewFinancialState(finance: AddFinance | undefined) {
   // Set finance details initially
   useEffect(() => {
     if (finance && finance.financial && finance.info) {
-      const { typeDisp, shortname } = finance.financial;
+      const { typeDisp, shortname, symbol } = finance.financial;
       const { regularMarketPrice, currency } = finance.info;
 
       dispatch({
@@ -65,6 +69,7 @@ function useNewFinancialState(finance: AddFinance | undefined) {
         payload: {
           type: typeDisp !== "Equity" ? typeDisp.toLowerCase() : "stock",
           name: shortname,
+          ticker: symbol,
           course: regularMarketPrice,
           currency: currency,
         },
@@ -76,6 +81,8 @@ function useNewFinancialState(finance: AddFinance | undefined) {
     ...state,
     setType: (type: string) => dispatch({ type: "SET_TYPE", payload: type }),
     setName: (name: string) => dispatch({ type: "SET_NAME", payload: name }),
+    setTicker: (ticker: string) =>
+      dispatch({ type: "SET_TICKER", payload: ticker }),
     setOwned: (owned: number) =>
       dispatch({ type: "SET_OWNED", payload: owned }),
     setCourse: (course: number) =>

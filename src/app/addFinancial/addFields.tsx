@@ -27,7 +27,7 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
         states.setValue(calculatedValue);
       }
     }
-  }, [states.owned, states.course, states.setValue, states.value, states.type]);
+  }, [states]);
 
   return (
     <div className="grid w-full items-center gap-4">
@@ -72,6 +72,17 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             value={states.name}
             onChange={(e) => {
               states.setName(e.target.value);
+            }}
+          />
+
+          <Label htmlFor="ticker">Stock ticker</Label>
+          <Input
+            type="string"
+            id="ticker"
+            placeholder="Ticker"
+            value={states.ticker}
+            onChange={(e) => {
+              states.setTicker(e.target.value);
             }}
           />
 
@@ -128,6 +139,17 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             value={states.name}
             onChange={(e) => {
               states.setName(e.target.value);
+            }}
+          />
+
+          <Label htmlFor="ticker">Fund / ETF ticker</Label>
+          <Input
+            type="string"
+            id="ticker"
+            placeholder="Ticker"
+            value={states.ticker}
+            onChange={(e) => {
+              states.setTicker(e.target.value);
             }}
           />
 
@@ -261,6 +283,17 @@ export function AddFinancialFields({ financeDetails, states }: AddProps) {
             value={states.name}
             onChange={(e) => {
               states.setName(e.target.value);
+            }}
+          />
+
+          <Label htmlFor="ticker">Cryptocurrency ticker</Label>
+          <Input
+            type="string"
+            id="ticker"
+            placeholder="Ticker"
+            value={states.ticker}
+            onChange={(e) => {
+              states.setTicker(e.target.value);
             }}
           />
 
